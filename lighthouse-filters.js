@@ -394,7 +394,8 @@
       '#lf-header h1{font-size:28px;font-weight:700;margin:0;color:#1a3a5c}',
       '#lf-result-count{font-size:14px;color:#888}',
 
-      '#lf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}',
+      '#lf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;animation:lf-fadein 0.3s ease}',
+      '@keyframes lf-fadein{from{opacity:0}to{opacity:1}}',
 
       '.lf-card{text-decoration:none;color:#333;border-radius:12px;overflow:hidden;transition:transform 0.15s,box-shadow 0.15s;background:#fff;border:1px solid #f0f0f0}',
       '.lf-card:hover{transform:translateY(-4px);box-shadow:0 8px 24px rgba(0,0,0,0.1)}',
@@ -412,11 +413,27 @@
       '.lf-badge.on-sale{background:#27ae60;color:#fff}',
       '.lf-card-img-wrap{position:relative}',
 
-      /* Loading / empty */
-      '#lf-loading{text-align:center;padding:60px 20px;color:#888;font-size:15px}',
+      /* Loading */
+      '#lf-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;min-height:400px}',
+      '.lf-loader-dots{display:flex;gap:8px;margin-bottom:20px}',
+      '.lf-loader-dots span{width:10px;height:10px;background:#1a3a5c;border-radius:50%;animation:lf-bounce 1.4s ease-in-out infinite both}',
+      '.lf-loader-dots span:nth-child(1){animation-delay:-0.32s}',
+      '.lf-loader-dots span:nth-child(2){animation-delay:-0.16s}',
+      '@keyframes lf-bounce{0%,80%,100%{transform:scale(0.4);opacity:0.3}40%{transform:scale(1);opacity:1}}',
+      '#lf-loading p{color:#999;font-size:14px;margin:0;font-weight:500}',
+
+      /* Skeleton cards while loading */
+      '.lf-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;width:100%}',
+      '.lf-skeleton-card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0f0f0}',
+      '.lf-skeleton-img{width:100%;aspect-ratio:1;background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:lf-shimmer 1.5s infinite}',
+      '.lf-skeleton-body{padding:12px 14px 16px}',
+      '.lf-skeleton-line{height:14px;border-radius:4px;background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:lf-shimmer 1.5s infinite;margin-bottom:8px}',
+      '.lf-skeleton-line.short{width:60%}',
+      '.lf-skeleton-line.price{width:40%;height:18px}',
+      '@keyframes lf-shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}',
+
+      /* Empty state */
       '#lf-empty{text-align:center;padding:60px 20px;color:#888;font-size:15px}',
-      '.lf-spinner{width:36px;height:36px;border:3px solid #eee;border-top-color:#1a3a5c;border-radius:50%;animation:lf-spin 0.8s linear infinite;margin:0 auto 16px}',
-      '@keyframes lf-spin{to{transform:rotate(360deg)}}',
 
       /* Mobile */
       '@media(max-width:768px){',
@@ -597,7 +614,11 @@
         '<span id="lf-result-count"></span>' +
         '</div>' +
         '<div id="lf-grid">' +
-        '<div id="lf-loading"><div class="lf-spinner"></div>Loading products...</div>' +
+        '<div id="lf-loading">' +
+        '<div class="lf-skeleton-grid">' +
+        Array(8).join('<div class="lf-skeleton-card"><div class="lf-skeleton-img"></div><div class="lf-skeleton-body"><div class="lf-skeleton-line"></div><div class="lf-skeleton-line short"></div><div class="lf-skeleton-line price"></div></div></div>') +
+        '</div>' +
+        '</div>' +
         '</div>' +
         '</div>';
 
