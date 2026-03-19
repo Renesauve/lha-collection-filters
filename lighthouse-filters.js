@@ -423,7 +423,7 @@
       '#lf-loading p{color:#999;font-size:14px;margin:0;font-weight:500}',
 
       /* Skeleton cards while loading */
-      '.lf-skeleton-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;width:100%}',
+      '.lf-skeleton-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;width:100%}',
       '.lf-skeleton-card{border-radius:12px;overflow:hidden;background:#fff;border:1px solid #f0f0f0}',
       '.lf-skeleton-img{width:100%;aspect-ratio:1;background:linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%);background-size:200% 100%;animation:lf-shimmer 1.5s infinite}',
       '.lf-skeleton-body{padding:12px 14px 16px}',
@@ -616,7 +616,7 @@
         '<div id="lf-grid">' +
         '<div id="lf-loading">' +
         '<div class="lf-skeleton-grid">' +
-        Array(8).join('<div class="lf-skeleton-card"><div class="lf-skeleton-img"></div><div class="lf-skeleton-body"><div class="lf-skeleton-line"></div><div class="lf-skeleton-line short"></div><div class="lf-skeleton-line price"></div></div></div>') +
+        Array(13).join('<div class="lf-skeleton-card"><div class="lf-skeleton-img"></div><div class="lf-skeleton-body"><div class="lf-skeleton-line"></div><div class="lf-skeleton-line short"></div><div class="lf-skeleton-line price"></div></div></div>') +
         '</div>' +
         '</div>' +
         '</div>' +
