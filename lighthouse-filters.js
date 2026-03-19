@@ -1,5 +1,5 @@
-/* Lighthouse Aquatics — Collection Filters v1 */
-/* Tag-based & category-based filtering for Lightspeed/Ecwid */
+/* Lighthouse Aquatics — Collection Filters v2 */
+/* Filterable product pages for Lightspeed/Ecwid */
 
 (function () {
   'use strict';
@@ -15,79 +15,23 @@
     'corals-lps':              197026558,
     'corals-soft':             197026563,
     'corals-sps':              197026566,
+    'corals-misc':             197026561,
     'equipment':               197017307,
     'aquariums':               197017308,
+    'aquarium-complete-systems': 197026565,
     'food-frozen':             197017310,
-    'supplements':             197017312,
     'food-dry':                197018306,
+    'supplements':             197017312,
     'filtration':              197018310,
     'decoration':              197026562,
-    'aquarium-complete-systems': 197026565,
-    'dry-goods':               197026567
-  };
-
-  /*
-   * Virtual collections — pages that pull from MULTIPLE categories
-   * and show sub-filters. The key is the URL slug.
-   *
-   * Each filter has:
-   *   label  – display name
-   *   match  – function(product) → boolean
-   *
-   * "All" filter is auto-added.
-   */
-  var COLLECTIONS = {
-    'live-corals': {
-      title: 'Live Corals',
-      categories: ['corals-lps', 'corals-soft', 'corals-sps'],
-      filters: [
-        /* ── By category ── */
-        { label: 'LPS Corals',   match: function (p) { return catSlug(p) === 'corals-lps'; } },
-        { label: 'SPS Corals',   match: function (p) { return catSlug(p) === 'corals-sps'; } },
-        { label: 'Soft Corals',  match: function (p) { return catSlug(p) === 'corals-soft'; } },
-        /* ── By name keyword ── */
-        { label: 'Acropora',     match: function (p) { return nameHas(p, 'acro'); } },
-        { label: 'Chalice',      match: function (p) { return nameHas(p, 'chalice'); } },
-        { label: 'Torch',        match: function (p) { return nameHas(p, 'torch'); } },
-        { label: 'Hammer',       match: function (p) { return nameHas(p, 'hammer'); } },
-        { label: 'Frogspawn',    match: function (p) { return nameHas(p, 'frogspawn'); } },
-        { label: 'Goniopora',    match: function (p) { return nameHas(p, 'goniopora', 'goni'); } },
-        { label: 'Montipora',    match: function (p) { return nameHas(p, 'montipora', 'monti'); } },
-        { label: 'Zoanthids',    match: function (p) { return nameHas(p, 'zoanthid', 'zoa'); } },
-        { label: 'Mushrooms',    match: function (p) { return nameHas(p, 'mushroom', 'shroom'); } },
-        { label: 'Leather',      match: function (p) { return nameHas(p, 'leather', 'toadstool'); } },
-        { label: 'Anemones',     match: function (p) { return nameHas(p, 'anemone'); } },
-        { label: 'Blastos',      match: function (p) { return nameHas(p, 'blasto'); } }
-      ]
-    },
-
-    'all-fish': {
-      title: 'Fish & Inverts',
-      categories: ['livestock', 'saltwater', 'cleaner-crews', 'fresh-water'],
-      filters: [
-        { label: 'Saltwater Fish', match: function (p) { return catSlug(p) === 'saltwater'; } },
-        { label: 'Cleaner Crews',  match: function (p) { return catSlug(p) === 'cleaner-crews'; } },
-        { label: 'Clownfish',     match: function (p) { return nameHas(p, 'clown'); } },
-        { label: 'Tangs',         match: function (p) { return nameHas(p, 'tang'); } },
-        { label: 'Wrasse',        match: function (p) { return nameHas(p, 'wrasse'); } },
-        { label: 'Gobies',        match: function (p) { return nameHas(p, 'goby', 'gobies'); } }
-      ]
-    },
-
-    'aquarium-supplies': {
-      title: 'Aquarium Supplies',
-      categories: ['equipment', 'aquariums', 'aquarium-complete-systems', 'filtration', 'supplements', 'food-dry', 'food-frozen', 'dry-goods', 'decoration'],
-      filters: [
-        { label: 'Aquariums',     match: function (p) { return catSlug(p) === 'aquariums'; } },
-        { label: 'Complete Systems', match: function (p) { return catSlug(p) === 'aquarium-complete-systems'; } },
-        { label: 'Equipment',    match: function (p) { return catSlug(p) === 'equipment'; } },
-        { label: 'Filtration',   match: function (p) { return catSlug(p) === 'filtration'; } },
-        { label: 'Supplements',  match: function (p) { return catSlug(p) === 'supplements'; } },
-        { label: 'Food',         match: function (p) { return catSlug(p) === 'food-dry' || catSlug(p) === 'food-frozen'; } },
-        { label: 'Dry Goods',    match: function (p) { return catSlug(p) === 'dry-goods'; } },
-        { label: 'Decoration',   match: function (p) { return catSlug(p) === 'decoration'; } }
-      ]
-    }
+    'dry-goods':               197026567,
+    'livestock':               197017314,
+    'fresh-water':             197026559,
+    'cleaner-crews':           197018311,
+    'lighting':                197026560,
+    'parts':                   197018307,
+    'furniture':               197017309,
+    'water':                   197017313
   };
 
   /* ── Helpers ── */
@@ -95,7 +39,7 @@
     return product._catSlug || '';
   }
 
-  function nameHas(product, /* ...keywords */) {
+  function nameHas(product /*, ...keywords */) {
     var name = (product.name || '').toLowerCase();
     for (var i = 1; i < arguments.length; i++) {
       if (name.indexOf(arguments[i].toLowerCase()) !== -1) return true;
@@ -115,8 +59,234 @@
     return '';
   }
 
+  /*
+   * ── Page configs ──
+   *
+   * Each key is a URL slug. When the script detects that slug,
+   * it activates filtering for that page.
+   *
+   * categories: which Ecwid categories to fetch products from
+   * filters:    clickable sub-filters shown in the sidebar
+   *             label = button text, match = function(product) → boolean
+   *
+   * "All" filter is auto-added to every page.
+   */
+  var PAGES = {
+
+    /* ═══════════════════════════════════════
+     *  COMBINED COLLECTION PAGES (multi-cat)
+     * ═══════════════════════════════════════ */
+
+    'live-corals': {
+      title: 'Live Corals',
+      categories: ['corals-lps', 'corals-soft', 'corals-sps', 'corals-misc'],
+      filters: [
+        { label: 'LPS Corals',   match: function (p) { return catSlug(p) === 'corals-lps' || catSlug(p) === 'corals-misc'; } },
+        { label: 'SPS Corals',   match: function (p) { return catSlug(p) === 'corals-sps'; } },
+        { label: 'Soft Corals',  match: function (p) { return catSlug(p) === 'corals-soft'; } },
+        { label: 'Acropora',     match: function (p) { return nameHas(p, 'acro'); } },
+        { label: 'Chalice',      match: function (p) { return nameHas(p, 'chalice'); } },
+        { label: 'Torch',        match: function (p) { return nameHas(p, 'torch'); } },
+        { label: 'Hammer',       match: function (p) { return nameHas(p, 'hammer'); } },
+        { label: 'Frogspawn',    match: function (p) { return nameHas(p, 'frogspawn'); } },
+        { label: 'Goniopora',    match: function (p) { return nameHas(p, 'goniopora', 'goni'); } },
+        { label: 'Montipora',    match: function (p) { return nameHas(p, 'montipora', 'monti'); } },
+        { label: 'Zoanthids',    match: function (p) { return nameHas(p, 'zoanthid', 'zoa'); } },
+        { label: 'Mushrooms',    match: function (p) { return nameHas(p, 'mushroom', 'shroom'); } },
+        { label: 'Leather',      match: function (p) { return nameHas(p, 'leather', 'toadstool'); } },
+        { label: 'Anemones',     match: function (p) { return nameHas(p, 'anemone'); } },
+        { label: 'Blastos',      match: function (p) { return nameHas(p, 'blasto'); } }
+      ]
+    },
+
+    'all-fish': {
+      title: 'Fish & Inverts',
+      categories: ['livestock', 'cleaner-crews'],
+      filters: [
+        { label: 'Clownfish',    match: function (p) { return nameHas(p, 'clown'); } },
+        { label: 'Wrasse',       match: function (p) { return nameHas(p, 'wrasse'); } },
+        { label: 'Tangs',        match: function (p) { return nameHas(p, 'tang'); } },
+        { label: 'Blennies',     match: function (p) { return nameHas(p, 'blenny'); } },
+        { label: 'Gobies',       match: function (p) { return nameHas(p, 'goby'); } },
+        { label: 'Triggers',     match: function (p) { return nameHas(p, 'trigger'); } },
+        { label: 'Anthias',      match: function (p) { return nameHas(p, 'anthias'); } },
+        { label: 'Angels',       match: function (p) { return nameHas(p, 'angel'); } },
+        { label: 'Cardinals',    match: function (p) { return nameHas(p, 'cardinal'); } },
+        { label: 'Butterflies',  match: function (p) { return nameHas(p, 'butterfly'); } },
+        { label: 'Cleaner Crews', match: function (p) { return catSlug(p) === 'cleaner-crews' || nameHas(p, 'snail', 'crab', 'shrimp', 'starfish', 'urchin', 'cucumber', 'nudibranch'); } }
+      ]
+    },
+
+    'aquarium-supplies': {
+      title: 'Aquarium Supplies',
+      categories: ['equipment', 'aquariums', 'aquarium-complete-systems', 'filtration', 'supplements', 'food-dry', 'food-frozen', 'dry-goods', 'decoration', 'lighting', 'parts', 'furniture', 'water'],
+      filters: [
+        { label: 'Aquariums',        match: function (p) { return catSlug(p) === 'aquariums'; } },
+        { label: 'Complete Systems', match: function (p) { return catSlug(p) === 'aquarium-complete-systems'; } },
+        { label: 'Equipment',        match: function (p) { return catSlug(p) === 'equipment'; } },
+        { label: 'Lighting',         match: function (p) { return catSlug(p) === 'lighting'; } },
+        { label: 'Filtration',       match: function (p) { return catSlug(p) === 'filtration'; } },
+        { label: 'Supplements',      match: function (p) { return catSlug(p) === 'supplements'; } },
+        { label: 'Dry Food',         match: function (p) { return catSlug(p) === 'food-dry'; } },
+        { label: 'Frozen Food',      match: function (p) { return catSlug(p) === 'food-frozen'; } },
+        { label: 'Parts',            match: function (p) { return catSlug(p) === 'parts'; } },
+        { label: 'Dry Goods',        match: function (p) { return catSlug(p) === 'dry-goods'; } },
+        { label: 'Decoration',       match: function (p) { return catSlug(p) === 'decoration'; } },
+        { label: 'Furniture',        match: function (p) { return catSlug(p) === 'furniture'; } }
+      ]
+    },
+
+    /* ═══════════════════════════════════════
+     *  INDIVIDUAL CATEGORY PAGES (single-cat)
+     * ═══════════════════════════════════════ */
+
+    'corals-lps': {
+      title: 'LPS Corals',
+      categories: ['corals-lps'],
+      filters: [
+        { label: 'Torch',        match: function (p) { return nameHas(p, 'torch'); } },
+        { label: 'Hammer',       match: function (p) { return nameHas(p, 'hammer'); } },
+        { label: 'Frogspawn',    match: function (p) { return nameHas(p, 'frogspawn'); } },
+        { label: 'Chalice',      match: function (p) { return nameHas(p, 'chalice'); } },
+        { label: 'Blastos',      match: function (p) { return nameHas(p, 'blasto'); } },
+        { label: 'Goniopora',    match: function (p) { return nameHas(p, 'goniopora', 'goni'); } },
+        { label: 'Bubble Coral', match: function (p) { return nameHas(p, 'bubble'); } },
+        { label: 'Anemones',     match: function (p) { return nameHas(p, 'anemone'); } },
+        { label: 'Scoly',        match: function (p) { return nameHas(p, 'scoly', 'scolymia'); } },
+        { label: 'Brain',        match: function (p) { return nameHas(p, 'brain', 'lobophyllia', 'trachyphyllia', 'trach'); } },
+        { label: 'Elegance',     match: function (p) { return nameHas(p, 'elegance'); } }
+      ]
+    },
+
+    'corals-sps': {
+      title: 'SPS Corals',
+      categories: ['corals-sps'],
+      filters: [
+        { label: 'Acropora',     match: function (p) { return nameHas(p, 'acro'); } },
+        { label: 'Montipora',    match: function (p) { return nameHas(p, 'montipora', 'monti'); } },
+        { label: 'Chalice',      match: function (p) { return nameHas(p, 'chalice'); } },
+        { label: 'Birds Nest',   match: function (p) { return nameHas(p, 'bird'); } },
+        { label: 'Stylophora',   match: function (p) { return nameHas(p, 'stylophora'); } }
+      ]
+    },
+
+    'corals-soft': {
+      title: 'Soft Corals',
+      categories: ['corals-soft'],
+      filters: [
+        { label: 'Zoanthids',    match: function (p) { return nameHas(p, 'zoanthid', 'zoa', 'zoo'); } },
+        { label: 'Mushrooms',    match: function (p) { return nameHas(p, 'mushroom', 'shroom', 'rhodactis', 'ricordea', 'discosoma'); } },
+        { label: 'Leather',      match: function (p) { return nameHas(p, 'leather', 'toadstool'); } },
+        { label: 'Anemones',     match: function (p) { return nameHas(p, 'anemone'); } },
+        { label: 'Gorgonian',    match: function (p) { return nameHas(p, 'gorgonian'); } },
+        { label: 'GSP / Polyps', match: function (p) { return nameHas(p, 'polyp', 'gsp', 'star polyp'); } }
+      ]
+    },
+
+    'corals-misc': {
+      title: 'Corals — Misc',
+      categories: ['corals-misc'],
+      filters: [
+        { label: 'Frags',        match: function (p) { return nameHas(p, 'frag'); } },
+        { label: 'Zoanthids',    match: function (p) { return nameHas(p, 'zoa', 'zoo'); } },
+        { label: 'Mushrooms',    match: function (p) { return nameHas(p, 'mushroom', 'shroom'); } },
+        { label: 'Hammer',       match: function (p) { return nameHas(p, 'hammer'); } },
+        { label: 'Torch',        match: function (p) { return nameHas(p, 'torch'); } },
+        { label: 'Leather',      match: function (p) { return nameHas(p, 'leather', 'toadstool'); } }
+      ]
+    },
+
+    'livestock': {
+      title: 'Livestock',
+      categories: ['livestock'],
+      filters: [
+        { label: 'Clownfish',    match: function (p) { return nameHas(p, 'clown'); } },
+        { label: 'Wrasse',       match: function (p) { return nameHas(p, 'wrasse'); } },
+        { label: 'Tangs',        match: function (p) { return nameHas(p, 'tang'); } },
+        { label: 'Blennies',     match: function (p) { return nameHas(p, 'blenny'); } },
+        { label: 'Gobies',       match: function (p) { return nameHas(p, 'goby'); } },
+        { label: 'Triggers',     match: function (p) { return nameHas(p, 'trigger'); } },
+        { label: 'Anthias',      match: function (p) { return nameHas(p, 'anthias'); } },
+        { label: 'Angels',       match: function (p) { return nameHas(p, 'angel'); } },
+        { label: 'Cardinals',    match: function (p) { return nameHas(p, 'cardinal'); } },
+        { label: 'Butterflies',  match: function (p) { return nameHas(p, 'butterfly'); } },
+        { label: 'Chromis',      match: function (p) { return nameHas(p, 'chromis'); } },
+        { label: 'Clams',        match: function (p) { return nameHas(p, 'clam'); } },
+        { label: 'Snails',       match: function (p) { return nameHas(p, 'snail'); } },
+        { label: 'Shrimp',       match: function (p) { return nameHas(p, 'shrimp'); } }
+      ]
+    },
+
+    'equipment': {
+      title: 'Equipment',
+      categories: ['equipment'],
+      filters: [
+        { label: 'Pumps',        match: function (p) { return nameHas(p, 'pump'); } },
+        { label: 'Skimmers',     match: function (p) { return nameHas(p, 'skimmer'); } },
+        { label: 'Heaters',      match: function (p) { return nameHas(p, 'heater'); } },
+        { label: 'Reactors',     match: function (p) { return nameHas(p, 'reactor'); } },
+        { label: 'Controllers',  match: function (p) { return nameHas(p, 'controller', 'apex'); } },
+        { label: 'Wavemakers',   match: function (p) { return nameHas(p, 'wavemaker', 'powerhead', 'gyre'); } },
+        { label: 'ATO',          match: function (p) { return nameHas(p, 'ato', 'auto top'); } },
+        { label: 'Test Kits',    match: function (p) { return nameHas(p, 'test'); } }
+      ]
+    },
+
+    'aquariums': {
+      title: 'Aquariums',
+      categories: ['aquariums'],
+      filters: [
+        { label: 'Lifegard',     match: function (p) { return nameHas(p, 'lifegard', 'lifeguard'); } },
+        { label: 'Coralife',     match: function (p) { return nameHas(p, 'coralife', 'biocube'); } },
+        { label: 'Visio',        match: function (p) { return nameHas(p, 'visio', 'viso'); } },
+        { label: 'SC Aquariums', match: function (p) { return nameHas(p, 'sc '); } },
+        { label: 'Ice Cap',      match: function (p) { return nameHas(p, 'ice cap', 'icecap'); } }
+      ]
+    },
+
+    'filtration': {
+      title: 'Filtration',
+      categories: ['filtration'],
+      filters: [
+        { label: 'Media',        match: function (p) { return nameHas(p, 'media', 'carbon', 'gfo', 'phosguard'); } },
+        { label: 'Filters',      match: function (p) { return nameHas(p, 'filter'); } },
+        { label: 'Socks / Pads', match: function (p) { return nameHas(p, 'sock', 'pad', 'floss'); } },
+        { label: 'Skimmers',     match: function (p) { return nameHas(p, 'skimmer'); } }
+      ]
+    },
+
+    'supplements': {
+      title: 'Supplements',
+      categories: ['supplements'],
+      filters: [
+        { label: 'Calcium',      match: function (p) { return nameHas(p, 'calcium', 'cal'); } },
+        { label: 'Alkalinity',   match: function (p) { return nameHas(p, 'alk', 'buffer', 'kh'); } },
+        { label: 'Magnesium',    match: function (p) { return nameHas(p, 'mag'); } },
+        { label: 'Trace Elements', match: function (p) { return nameHas(p, 'trace', 'iodine', 'strontium'); } },
+        { label: 'Bacteria',     match: function (p) { return nameHas(p, 'bacteria', 'bio'); } },
+        { label: 'Coral Food',   match: function (p) { return nameHas(p, 'food', 'feed', 'amino'); } }
+      ]
+    },
+
+    'lighting': {
+      title: 'Lighting',
+      categories: ['lighting'],
+      filters: [
+        { label: 'LED',          match: function (p) { return nameHas(p, 'led'); } },
+        { label: 'T5',           match: function (p) { return nameHas(p, 't5'); } },
+        { label: 'Bulbs',        match: function (p) { return nameHas(p, 'bulb', 'lamp'); } },
+        { label: 'Mounts',       match: function (p) { return nameHas(p, 'mount', 'bracket', 'arm'); } }
+      ]
+    }
+  };
+
   /* ── Detect current page ── */
   function getSlug() {
+    /* Check for ?page= param first (for local testing) */
+    var params = new URLSearchParams(window.location.search);
+    var testPage = params.get('page');
+    if (testPage) return testPage;
+
     var path = window.location.pathname.replace(/\/$/, '');
     var parts = path.split('/');
     return parts[parts.length - 1] || '';
@@ -260,7 +430,6 @@
     var priceMax = null;
     var sortBy = 'name-asc';
 
-    /* Count products per filter */
     function countFor(filter) {
       if (!filter) return products.length;
       return products.filter(filter.match).length;
@@ -277,7 +446,6 @@
       if (priceMax !== null) {
         list = list.filter(function (p) { return p.price <= priceMax; });
       }
-      /* Sort */
       list = list.slice().sort(function (a, b) {
         switch (sortBy) {
           case 'price-asc': return (a.price || 0) - (b.price || 0);
@@ -309,7 +477,7 @@
 
         return '<a class="lf-card" href="' + (p.url || '#') + '">' +
           '<div class="lf-card-img-wrap">' + badge +
-          (img ? '<img class="lf-card-img" src="' + img + '" alt="' + (p.name || '') + '" loading="lazy">' :
+          (img ? '<img class="lf-card-img" src="' + img + '" alt="' + (p.name || '').replace(/"/g, '&quot;') + '" loading="lazy">' :
             '<div class="lf-card-img"></div>') +
           '</div>' +
           '<div class="lf-card-body">' +
@@ -324,17 +492,15 @@
 
     function renderFilters() {
       var sidebar = container.querySelector('#lf-sidebar');
-      /* Filter buttons */
       var html = '<h3>' + collection.title + '</h3>';
       html += '<button class="lf-filter is-active" data-idx="-1">All<span class="lf-count">(' + products.length + ')</span></button>';
       collection.filters.forEach(function (f, i) {
         var count = countFor(f);
-        if (count === 0) return; /* hide empty filters */
+        if (count === 0) return;
         html += '<button class="lf-filter" data-idx="' + i + '">' + f.label +
           '<span class="lf-count">(' + count + ')</span></button>';
       });
 
-      /* Price filter */
       html += '<div id="lf-price-wrap"><h4>Price</h4>' +
         '<div id="lf-price-inputs">' +
         '<input type="number" id="lf-price-min" placeholder="Min">' +
@@ -342,18 +508,16 @@
         '<input type="number" id="lf-price-max" placeholder="Max">' +
         '</div></div>';
 
-      /* Sort */
       html += '<div id="lf-sort-wrap"><h4>Sort by</h4>' +
         '<select id="lf-sort">' +
-        '<option value="name-asc">Name A–Z</option>' +
-        '<option value="name-desc">Name Z–A</option>' +
+        '<option value="name-asc">Name A\u2013Z</option>' +
+        '<option value="name-desc">Name Z\u2013A</option>' +
         '<option value="price-asc">Price: Low to High</option>' +
         '<option value="price-desc">Price: High to Low</option>' +
         '</select></div>';
 
       sidebar.innerHTML = html;
 
-      /* Bind filter clicks */
       sidebar.querySelectorAll('.lf-filter').forEach(function (btn) {
         btn.addEventListener('click', function () {
           sidebar.querySelectorAll('.lf-filter').forEach(function (b) { b.classList.remove('is-active'); });
@@ -361,14 +525,12 @@
           var idx = parseInt(btn.getAttribute('data-idx'));
           activeFilter = idx >= 0 ? collection.filters[idx] : null;
           renderGrid();
-          /* Scroll to top of grid on mobile */
           if (window.innerWidth <= 768) {
             container.querySelector('#lf-main').scrollIntoView({ behavior: 'smooth' });
           }
         });
       });
 
-      /* Bind price inputs */
       var debounce = null;
       function onPriceChange() {
         clearTimeout(debounce);
@@ -383,7 +545,6 @@
       container.querySelector('#lf-price-min').addEventListener('input', onPriceChange);
       container.querySelector('#lf-price-max').addEventListener('input', onPriceChange);
 
-      /* Bind sort */
       container.querySelector('#lf-sort').addEventListener('change', function () {
         sortBy = this.value;
         renderGrid();
@@ -397,21 +558,18 @@
   /* ── Init ── */
   function init() {
     var slug = getSlug();
-    var collection = COLLECTIONS[slug];
-    if (!collection) return; /* not a virtual collection page, do nothing */
+    var collection = PAGES[slug];
+    if (!collection) return;
 
     injectCSS();
 
-    /* Wait for Ecwid to finish rendering, then replace content */
     var interval = setInterval(function () {
-      /* Find the main content area — Ecwid product browser */
       var productBrowser = document.querySelector('.ec-store') ||
         document.querySelector('[data-ec-store]') ||
         document.querySelector('.ecwid-productBrowser') ||
         document.querySelector('#product-details') ||
         document.querySelector('[class*="ProductBrowser"]');
 
-      /* Also look for the Lightspeed page content wrapper */
       var pageContent = document.querySelector('.page-content') ||
         document.querySelector('main') ||
         document.querySelector('[class*="content"]');
@@ -420,7 +578,6 @@
       if (!target) return;
       clearInterval(interval);
 
-      /* Build our container */
       var root = document.createElement('div');
       root.id = 'lf-root';
       root.innerHTML =
@@ -435,17 +592,14 @@
         '</div>' +
         '</div>';
 
-      /* Replace the product browser content */
       target.innerHTML = '';
       target.appendChild(root);
 
-      /* Update page title */
       var pageTitle = document.querySelector('h1');
       if (pageTitle && pageTitle !== root.querySelector('h1')) {
         pageTitle.style.display = 'none';
       }
 
-      /* Fetch and render */
       fetchCollection(collection, function (err, products) {
         if (err) {
           root.querySelector('#lf-grid').innerHTML =
@@ -454,7 +608,6 @@
           return;
         }
 
-        /* Deduplicate by product ID */
         var seen = {};
         products = products.filter(function (p) {
           if (seen[p.id]) return false;
@@ -462,21 +615,19 @@
           return true;
         });
 
-        console.log('Lighthouse filters: loaded ' + products.length + ' products');
+        console.log('Lighthouse filters: loaded ' + products.length + ' products for "' + slug + '"');
         render(root, collection, products);
       });
     }, 500);
 
-    /* Safety timeout */
     setTimeout(function () { clearInterval(interval); }, 15000);
   }
 
-  /* Run on page load */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
   }
 
-  console.log('Lighthouse collection filters loaded');
+  console.log('Lighthouse collection filters v2 loaded');
 })();
