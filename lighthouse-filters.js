@@ -414,7 +414,7 @@
       '.lf-card-img-wrap{position:relative}',
 
       /* Loading */
-      '#lf-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;min-height:400px}',
+      '#lf-loading{grid-column:1/-1;padding:0}',
       '.lf-loader-dots{display:flex;gap:8px;margin-bottom:20px}',
       '.lf-loader-dots span{width:10px;height:10px;background:#1a3a5c;border-radius:50%;animation:lf-bounce 1.4s ease-in-out infinite both}',
       '.lf-loader-dots span:nth-child(1){animation-delay:-0.32s}',
@@ -444,6 +444,7 @@
         '.lf-filter.is-active{border-color:#1a3a5c}',
         '#lf-price-wrap,#lf-sort-wrap{border-top:none;padding-top:0;margin-top:8px;width:100%}',
         '#lf-grid{grid-template-columns:repeat(2,1fr);gap:12px}',
+        '.lf-skeleton-grid{grid-template-columns:repeat(2,1fr)}',
       '}'
     ];
 
