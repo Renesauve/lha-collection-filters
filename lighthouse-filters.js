@@ -280,6 +280,18 @@
     }
   };
 
+  /* ── Hide product tile immediately to prevent flash of old layout ── */
+  (function () {
+    var slug = (new URLSearchParams(window.location.search).get('page')) ||
+      window.location.pathname.replace(/\/$/, '').split('/').pop() || '';
+    if (PAGES[slug]) {
+      var s = document.createElement('style');
+      s.id = 'lf-hide-old';
+      s.textContent = '#tile-product-details,.ins-tile--product-browser{opacity:0;min-height:400px}';
+      document.head.appendChild(s);
+    }
+  })();
+
   /* ── Detect current page ── */
   function getSlug() {
     /* Check for ?page= param first (for local testing) */
@@ -591,6 +603,11 @@
 
       target.innerHTML = '';
       target.appendChild(root);
+      target.style.opacity = '1';
+
+      /* Remove the hide style */
+      var hideStyle = document.getElementById('lf-hide-old');
+      if (hideStyle) hideStyle.remove();
 
       var pageTitle = document.querySelector('h1');
       if (pageTitle && pageTitle !== root.querySelector('h1')) {
