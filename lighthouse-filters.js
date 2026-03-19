@@ -564,17 +564,14 @@
     injectCSS();
 
     var interval = setInterval(function () {
-      var productBrowser = document.querySelector('.ec-store') ||
-        document.querySelector('[data-ec-store]') ||
-        document.querySelector('.ecwid-productBrowser') ||
+      /* Lightspeed tile-based layout */
+      var target = document.querySelector('#tile-product-details') ||
+        document.querySelector('.ins-tile--product-browser') ||
+        document.querySelector('.ec-store') ||
         document.querySelector('#product-details') ||
-        document.querySelector('[class*="ProductBrowser"]');
+        document.querySelector('.page-content') ||
+        document.querySelector('main');
 
-      var pageContent = document.querySelector('.page-content') ||
-        document.querySelector('main') ||
-        document.querySelector('[class*="content"]');
-
-      var target = productBrowser || pageContent;
       if (!target) return;
       clearInterval(interval);
 
