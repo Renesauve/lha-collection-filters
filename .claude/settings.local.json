@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"aquatics\\\\|lighthouse\" /c/Users/rdasa/WebDev --include=*.json --include=*.md)",
+      "Bash(grep -r \"Lightspeed\\\\|Ecwid\" /c/Users/rdasa/WebDev --include=*.js --include=*.ts --include=*.tsx --include=*.json)",
+      "Bash(ls:*)",
+      "Bash(find /c/Users/rdasa/WebDev -maxdepth 2 \\\\\\(-name README* -o -name TODO* -o -name NOTES* -o -name .env* \\\\\\))",
+      "WebFetch(domain:api-docs.ecwid.com)",
+      "WebFetch(domain:app.ecwid.com)",
+      "WebFetch(domain:lighthouseaquaticsinc.company.site)",
+      "WebFetch(domain:docs.ecwid.com)",
+      "Bash(curl -s -H 'Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe' \"https://app.ecwid.com/api/v3/132229530/products?category=197026558&enabled=true&limit=3\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026566&enabled=true&limit=1\")",
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{let j=JSON.parse\\(d\\);console.log\\(''''SPS total:'''',j.total\\)}\\)\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026563&enabled=true&limit=1\")",
+      "Bash(node -e \"let d='''''''';process.stdin.on\\(''''data'''',c=>d+=c\\);process.stdin.on\\(''''end'''',\\(\\)=>{let j=JSON.parse\\(d\\);console.log\\(''''Soft total:'''',j.total\\)}\\)\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026558&enabled=true&limit=100\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026566&enabled=true&limit=100\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026563&enabled=true&limit=100\")",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(gh repo:*)",
+      "Bash(gh api:*)",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/categories\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197026561&enabled=true&limit=55\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197017314&enabled=true&limit=50\")",
+      "Bash(curl -s -H \"Authorization: Bearer public_Qn1DGne1nuyH457RsSLmYgQJ1XRrGZXe\" \"https://app.ecwid.com/api/v3/132229530/products?category=197017308&enabled=true&limit=30\")",
+      "Bash(git push:*)",
+      "Bash(git tag:*)",
+      "WebFetch(domain:cdn.jsdelivr.net)",
+      "Bash(curl:*)"
+    ]
+  }
+}
